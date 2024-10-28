@@ -1,5 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { WeatherForecastItem } from './types';
+import dotenv from 'dotenv'
+
+dotenv.config({ path: '/mnt/secrets/.env' });
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
