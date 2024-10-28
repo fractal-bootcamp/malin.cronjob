@@ -1,17 +1,7 @@
 import nodemailer from 'nodemailer';
 import axios from 'axios';
-
-type WeatherForecastItem = {
-  dt: number;
-  main: {
-    temp: number;
-    feels_like: number;
-    humidity: number;
-  };
-  weather: [{
-    description: string;
-  }];
-};
+import type { WeatherForecastItem } from './types';
+import { getClothingRecommendation } from './whattowear';
 
 // Create a transporter using Gmail
 const transporter = nodemailer.createTransport({
@@ -39,14 +29,19 @@ async function getWeatherForecast(): Promise<WeatherForecastItem[]> {
 async function sendWeatherEmail(to: string): Promise<nodemailer.SentMessageInfo> {
   try {
     const forecast: WeatherForecastItem[] = await getWeatherForecast();
+    const clothingRecommendation = await getClothingRecommendation(forecast);
     
     const weatherHTML = forecast.map((item: WeatherForecastItem) => {
       const date = new Date(item.dt * 1000);
+      const tempF = Math.round(item.main.temp);
+      const feelsLikeF = Math.round(item.main.feels_like);
+      const tempC = Math.round((tempF - 32) * 5/9);
+      const feelsLikeC = Math.round((feelsLikeF - 32) * 5/9);
       return `
         <div style="margin-bottom: 20px; padding: 10px; background-color: #fff; border-radius: 5px;">
           <h3 style="color: #333;">${date.toLocaleTimeString()}</h3>
-          <p>Temperature: ${Math.round(item.main.temp)}°F</p>
-          <p>Feels like: ${Math.round(item.main.feels_like)}°F</p>
+          <p>Temperature: ${tempF}°F / ${tempC}°C</p>
+          <p>Feels like: ${feelsLikeF}°F / ${feelsLikeC}°C</p>
           <p>Weather: ${item.weather[0].description}</p>
           <p>Humidity: ${item.main.humidity}%</p>
         </div>
@@ -56,10 +51,14 @@ async function sendWeatherEmail(to: string): Promise<nodemailer.SentMessageInfo>
     const result = await transporter.sendMail({
       from: '"Weather Update" <malink027@gmail.com>',
       to: to,
-      subject: "Brooklyn Weather Forecast",
+      subject: "Brooklyn Weather Today",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5; border-radius: 10px;">
           <h1 style="color: #4a90e2;">🌤️ Brooklyn Weather Forecast</h1>
+          <div style="margin-bottom: 20px; padding: 15px; background-color: #fff; border-radius: 5px;">
+            <h2 style="color: #333;">🧥 What to Wear Today</h2>
+            <p style="white-space: pre-line; font-style: italic;">${clothingRecommendation}</p>
+          </div>
           ${weatherHTML}
           <p style="font-size: 12px; color: #888; text-align: center;">
             Generated at ${new Date().toLocaleString()}
@@ -77,7 +76,13 @@ async function sendWeatherEmail(to: string): Promise<nodemailer.SentMessageInfo>
 // Example usage
 async function main() {
   try {
-    await sendWeatherEmail("malin.kankanamge@gmail.com");
+    const emailAddresses = [
+      "malin.kankanamge@gmail.com",
+      "jacobwaldor@gmail.com",
+      "pizzacort@iivi.co"
+    ];
+    
+    await sendWeatherEmail(emailAddresses.join(", "));
     console.log('Weather forecast email sent successfully!');
   } catch (error) {
     console.error('Failed to send weather forecast:', error);
