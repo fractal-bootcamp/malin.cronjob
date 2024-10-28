@@ -2,6 +2,9 @@ import nodemailer from 'nodemailer';
 import axios from 'axios';
 import type { WeatherForecastItem } from './types';
 import { getClothingRecommendation } from './whattowear';
+import dotenv from 'dotenv'
+
+dotenv.config({ path: '/mnt/secrets/.env' });
 
 // Create a transporter using Gmail
 const transporter = nodemailer.createTransport({
@@ -77,9 +80,7 @@ async function sendWeatherEmail(to: string): Promise<nodemailer.SentMessageInfo>
 async function main() {
   try {
     const emailAddresses = [
-      "malin.kankanamge@gmail.com",
-      "jacobwaldor@gmail.com",
-      "pizzacort@iivi.co"
+      "example@gmail.com",
     ];
     
     await sendWeatherEmail(emailAddresses.join(", "));
