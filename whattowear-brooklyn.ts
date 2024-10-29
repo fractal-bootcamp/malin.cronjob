@@ -1,8 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { WeatherForecastItem } from './types';
-import dotenv from 'dotenv'
+//import dotenv from 'dotenv'
 
-dotenv.config({ path: '/mnt/secrets/.env' });
+//dotenv.config({ path: '/mnt/secrets/.env' });
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -24,7 +24,7 @@ Humidity: ${item.main.humidity}%`;
       max_tokens: 150,
       messages: [{
         role: 'user',
-        content: `Based on this weather forecast for Brooklyn:
+        content: `Based on this weather forecast:
 ${weatherSummary}
 
 Please provide two haiku-style recommendations for what to wear today:
@@ -34,7 +34,7 @@ Please provide two haiku-style recommendations for what to wear today:
 Requirements:
 - Focus on practical clothing choices
 - Suggest a scarf if temperature is cold
-- Include any weather warnings (rain, snow, cold)
+- Include any weather warnings (rain, snow, cold, heatwave)
 - Begin each clothing recommendation line with an appropriate emoji
 
 Structure your response like this:
